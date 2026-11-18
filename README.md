@@ -2,7 +2,11 @@
 
 This repository contains a local, multi-tenant WhatsApp AI platform scaffold built with Fastify, React, Vite, Prisma, and Redis-friendly worker architecture. The project is designed for local Windows hosting and includes backend APIs, UI shell, security primitives, and operational scripts.
 
-## Interface preview
+## Project cover
+
+![Own Chat project cover](docs/cover.png)
+
+## Sign-in preview
 
 ![Own Chat sign-in screen](docs/sign-in.png)
 
