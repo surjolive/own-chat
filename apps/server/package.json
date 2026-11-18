@@ -1,0 +1,36 @@
+{
+  "name": "@surjo/server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/main.js",
+    "lint": "tsc --noEmit",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@fastify/cors": "^10.0.0",
+    "@fastify/helmet": "^13.0.0",
+    "@fastify/rate-limit": "^10.0.0",
+    "@fastify/swagger": "^9.0.0",
+    "@fastify/swagger-ui": "^5.0.0",
+    "@prisma/client": "^5.22.0",
+    "@surjo/security": "workspace:*",
+    "@surjo/shared": "workspace:*",
+    "@surjo/whatsapp-engine": "workspace:*",
+    "argon2": "^0.41.1",
+    "bullmq": "^5.13.0",
+    "dotenv": "^16.4.7",
+    "fastify": "^5.1.0",
+    "pino-pretty": "^13.0.0",
+    "redis": "^4.7.0",
+    "ws": "^8.18.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

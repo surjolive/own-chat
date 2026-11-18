@@ -1,0 +1,217 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  USER
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  PENDING
+}
+
+enum ConnectionStatus {
+  DISCONNECTED
+  CONNECTING
+  CONNECTED
+  RECONNECTING
+}
+
+enum ProviderType {
+  OMNIROUTE
+  OLLAMA
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  COMPLETED
+  FAILED
+}
+
+enum MessageSenderType {
+  USER
+  CONTACT
+  BOT
+  SYSTEM
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  AUDIO
+  DOCUMENT
+  TEMPLATE
+}
+
+enum DeliveryStatus {
+  PENDING
+  SENT
+  DELIVERED
+  FAILED
+}
+
+model User {
+  id                           String      @id @default(cuid())
+  username                     String      @unique
+  email                        String      @unique
+  passwordHash                 String
+  role                         UserRole    @default(USER)
+  status                       UserStatus  @default(ACTIVE)
+  tenantId                     String      @default(cuid())
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  whatsappAccounts WhatsAppAccount[]
+  conversations    Conversation[]
+  messages         Message[]
+  auditLogs        AuditLog[]
+  aiProviderConfigs AIProviderConfig[]
+  botSettings      BotSetting[]
+  contactPolicies  ContactPolicy[]
+  actionApprovals  ActionApproval[]
+}
+
+model WhatsAppAccount {
+  id               String            @id @default(cuid())
+  userId           String
+  displayName      String?
+  phoneNumber      String?
+  connectionStatus ConnectionStatus @default(DISCONNECTED)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessions         WhatsAppSession[]
+  conversations    Conversation[]
+
+  @@index([userId])
+}
+
+model WhatsAppSession {
+  id                  String    @id @default(cuid())
+  accountId           String    @unique
+  storageReference    String
+  encrypted           Boolean   @default(true)
+  lastConnectedAt      DateTime?
+  lastDisconnectedAt  DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  account             WhatsAppAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+}
+
+model AIProviderConfig {
+  id             String       @id @default(cuid())
+  userId         String
+  provider       ProviderType
+  baseUrl        String?
+  encryptedApiKey String?
+  defaultModel   String?
+  enabled        Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, provider])
+}
+
+model BotSetting {
+  id              String   @id @default(cuid())
+  userId          String
+  accountId       String?
+  autoReplyEnabled Boolean @default(false)
+  personality     String?
+  language        String  @default("en")
+  systemPrompt    String?
+  replySettings   Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Conversation {
+  id          String    @id @default(cuid())
+  userId      String
+  accountId   String?
+  chatId      String
+  title       String?
+  status      String    @default("ACTIVE")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account     WhatsAppAccount? @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  messages    Message[]
+
+  @@index([userId, chatId])
+}
+
+model Message {
+  id               String          @id @default(cuid())
+  userId           String
+  conversationId   String
+  externalMessageId String?
+  senderType       MessageSenderType
+  content          String?
+  messageType      MessageType      @default(TEXT)
+  deliveryStatus   DeliveryStatus   @default(PENDING)
+  createdAt        DateTime         @default(now())
+
+  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversation     Conversation     @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+}
+
+model ContactPolicy {
+  id             String   @id @default(cuid())
+  userId         String
+  contactId      String
+  optedIn        Boolean  @default(false)
+  blocked        Boolean  @default(false)
+  autoReplyEnabled Boolean @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, contactId])
+}
+
+model ActionApproval {
+  id          String        @id @default(cuid())
+  userId      String
+  actionType  String
+  payload     Json
+  status      ApprovalStatus @default(PENDING)
+  createdAt   DateTime      @default(now())
+  approvedAt  DateTime?
+
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  actorId      String?
+  event        String
+  resourceType String?
+  resourceId   String?
+  metadata     Json?
+  createdAt    DateTime @default(now())
+
+  actor        User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+}

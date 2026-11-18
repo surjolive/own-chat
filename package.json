@@ -1,0 +1,26 @@
+{
+  "name": "surjo-whatsapp-ai",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@9.15.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "pnpm -r --parallel dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "test": "vitest run",
+    "db:generate": "pnpm --dir packages/database exec prisma generate",
+    "db:migrate": "pnpm --dir packages/database exec prisma migrate dev --name init",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "tsup": "^9.0.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

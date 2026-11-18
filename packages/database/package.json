@@ -1,0 +1,16 @@
+{
+  "name": "@surjo/database",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "prisma generate",
+    "migrate": "prisma migrate dev --name init",
+    "lint": "prisma validate",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "prisma": "^5.22.0"
+  }
+}
